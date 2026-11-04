@@ -1,9 +1,6 @@
-<table width="100%">
-  <tr>
-    <td align="left"><img src="docs/USJ.svg" alt="Universidad San Jorge" height="50"></td>
-    <td align="right"><img src="docs/EARTE.svg" alt="EARTE" height="50"></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="docs/banner.svg" alt="Universidad San Jorge · Escuela de Arquitectura y Tecnología" width="100%">
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-%3E%3D22.18-5FA04E?logo=nodedotjs&logoColor=white" alt="Node.js >= 22.18">
@@ -43,9 +40,13 @@ npm run check
 npm run dev
 ```
 
-Create the tables with [`db-schema.sql`](db-schema.sql) (see [Database schema](#database-schema)) before sending requests. The terminal prints the listening URL, by default `http://localhost:3000`.
+> [!IMPORTANT]
+> Create the tables with [`db-schema.sql`](db-schema.sql) (see [Database schema](#database-schema)) before sending requests. Otherwise every request that touches the database fails with `500`.
 
-Each request is logged as `METHOD /url STATUS - Nms`. Editing a TypeScript file restarts the development server. After editing `.env`, restart it manually. Stop it with Ctrl+C.
+The terminal prints the listening URL, by default `http://localhost:3000`. Each request is logged as `METHOD /url STATUS - Nms`. Stop the server with Ctrl+C.
+
+> [!NOTE]
+> Editing a TypeScript file restarts the development server automatically. Editing `.env` does not: restart it manually.
 
 ## Configuration
 
@@ -57,7 +58,10 @@ All variables are read from `.env`:
 | `DATABASE_URI` | **Yes** | PostgreSQL connection string. The server refuses to start without it. |
 | `JWT_SECRET` | **Yes** | Secret used to sign and verify tokens (HS256). Without it, login and protected routes fail. |
 
-**Supabase:** copy the PostgreSQL URI from **Connect → Session pooler** (port 5432). Replace the password placeholder with your database password, percent-encoding any reserved characters.
+**Supabase:** copy the PostgreSQL URI from **Connect → Session pooler** (port 5432) and replace the password placeholder with your database password.
+
+> [!TIP]
+> If your database password contains reserved characters such as `@`, `#`, `/` or `:`, percent-encode them in the URI (for example `@` becomes `%40`). Otherwise the connection fails with an authentication or host error.
 
 **JWT secret:** generate one locally and never reuse the placeholder:
 
@@ -65,7 +69,8 @@ All variables are read from `.env`:
 node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-Keep `.env`, `node_modules/` and `dist/` out of version control and submissions. The `.gitignore` already covers them.
+> [!CAUTION]
+> `.env` holds your database password and JWT secret. Never commit it, share it or include it in a submission (including `.zip` files). The `.gitignore` already excludes `.env`, `node_modules/` and `dist/`.
 
 ## Database schema
 
@@ -79,6 +84,9 @@ Sign-up always creates a `visitor`, because `role` is not sent on insert. To cre
 ```sql
 update users set role = 'admin' where username = 'your-username';
 ```
+
+> [!WARNING]
+> The role is stored inside the JWT. After promoting a user, **log in again** to get a new token. An older token still says `visitor` until it expires, and admin routes return `403`.
 
 ## API reference
 
@@ -194,7 +202,10 @@ Replaces the whole object, so every field is required:
 }
 ```
 
-`status` should be `stored` or `returned`, but this route does not check the value. Any `id` in the body is ignored. Returns `200` and the updated object.
+Any `id` in the body is ignored. Returns `200` and the updated object.
+
+> [!WARNING]
+> `status` should be `stored` or `returned`, but this route does not check the value, and the table has no constraint either. Any other text is saved as is.
 
 | Status | Body | Cause |
 | --- | --- | --- |
@@ -231,9 +242,13 @@ These can happen on any route:
 | `400` | `{ "error": "<message>" }` | The request body is not valid JSON |
 | `500` | `{ "error": "<message>" }` | Unexpected server error, for example the database is unreachable or a field is not a string |
 
-Errors detected by the API itself use `message`. Errors caught by the error handler use `error`.
+> [!NOTE]
+> Errors detected by the API itself use `message`. Errors caught by the error handler use `error`.
 
 ### Example with curl
+
+> [!NOTE]
+> These commands use bash syntax (macOS, Linux, Git Bash or WSL). In PowerShell, `curl` is an alias for `Invoke-WebRequest` and `TOKEN=$(...)` does not work.
 
 ```sh
 # Sign up and log in
@@ -302,4 +317,5 @@ Requests pass through these layers: **route → middleware → controller** (val
 | `npm run build` | Compile `src/` into `dist/` |
 | `npm start` | Run the compiled `dist/index.js` and load `.env` |
 
-Run `npm run build` before `npm start`. Stop the development server first so both don't try to use the same port.
+> [!TIP]
+> Run `npm run build` before `npm start`, and stop the development server first so both don't try to use the same port.
