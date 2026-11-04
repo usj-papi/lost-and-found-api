@@ -317,5 +317,3 @@ Requests pass through these layers: **route → middleware → controller** (val
 | `npm run build` | Compile `src/` into `dist/` |
 | `npm start` | Run the compiled `dist/index.js` and load `.env` |
 
-> [!TIP]
-> Run `npm run build` before `npm start`, and stop the development server first so both don't try to use the same port.
