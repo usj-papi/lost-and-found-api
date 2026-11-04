@@ -12,7 +12,7 @@ export class LostObjectController {
   async getLostObjectById(req: Request, res: Response) {
     const id = req.params.id;
 
-    if (!id) {
+    if (!id || typeof id !== "string") {
       res.status(400).json({ message: "Missing id" });
       return;
     }

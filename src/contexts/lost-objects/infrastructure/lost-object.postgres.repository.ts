@@ -50,11 +50,11 @@ export class LostObjectPostgresRepository implements Repository<LostObject> {
 
     const updatedLostObject = await this.db.oneOrNone<LostObject>(
       `UPDATE lost_objects
-       SET name = ${lostObject.name},
-        description = ${lostObject.description},
-        location = ${lostObject.location},
-        status = ${lostObject.status}
-       WHERE id = ${lostObject.id}
+       SET name = $<name>,
+        description = $<description>,
+        location = $<location>,
+        status = $<status>
+       WHERE id = $<id>
        RETURNING *`,
       lostObject,
     );
