@@ -1,3 +1,16 @@
+<table width="100%">
+  <tr>
+    <td align="left"><img src="docs/USJ.svg" alt="Universidad San Jorge" height="50"></td>
+    <td align="right"><img src="docs/EARTE.svg" alt="EARTE" height="50"></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D22.18-5FA04E?logo=nodedotjs&logoColor=white" alt="Node.js >= 22.18">
+  <img src="https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white" alt="TypeScript 7">
+  <img src="https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white" alt="Express 5">
+</p>
+
 # Lost and Found API
 
 A REST API for registering and listing objects found on campus. It is built with Node.js, TypeScript and Express, stores its data in PostgreSQL (for example Supabase), and uses JWT authentication with two roles: `visitor` and `admin`.
@@ -102,7 +115,10 @@ Returns `201` and the created user. The password hash is never returned:
 }
 ```
 
-Errors: `400` if a field is missing or is not a non-empty string, `409` if the username already exists.
+| Status | Body | Cause |
+| --- | --- | --- |
+| `400` | `{ "message": "Username and password are required" }` | `username` or `password` is missing or empty |
+| `409` | `{ "message": "Username already exists" }` | Another user already has that username |
 
 ### `POST /auth/login`
 
@@ -110,7 +126,14 @@ Errors: `400` if a field is missing or is not a non-empty string, `409` if the u
 { "username": "alice", "password": "secret" }
 ```
 
-Returns `200` with `{ "token": "<jwt>" }`. The token payload holds `sub` (the user id), `username` and `role`. Errors: `400` missing fields or fields that are not non-empty strings, `401` invalid username or password. An unknown user and a wrong password get the same response, so callers cannot tell which usernames exist.
+Returns `200` with `{ "token": "<jwt>" }`. The token payload holds `sub` (the user id), `username` and `role`.
+
+| Status | Body | Cause |
+| --- | --- | --- |
+| `400` | `{ "message": "Username and password are required" }` | `username` or `password` is missing or empty |
+| `401` | `{ "message": "Invalid username or password" }` | Unknown user or wrong password |
+
+An unknown user and a wrong password get the same response, so callers cannot tell which usernames exist.
 
 ### `GET /lost-objects`
 
@@ -129,9 +152,16 @@ Returns `200` and an array of lost objects:
 ]
 ```
 
+No errors besides the [authentication errors](#authentication-errors).
+
 ### `GET /lost-objects/:id`
 
-Returns `200` and one lost object, with the same fields as in the list above. Errors: `400` if `:id` is not a UUID, `404` if no lost object has that id.
+Returns `200` and one lost object, with the same fields as in the list above.
+
+| Status | Body | Cause |
+| --- | --- | --- |
+| `404` | `{ "message": "Lost object not found" }` | No lost object has that id |
+| `500` | `{ "error": "<message>" }` | `:id` is not a valid UUID, so PostgreSQL rejects the query |
 
 ### `POST /lost-objects`
 
@@ -144,7 +174,12 @@ Returns `200` and one lost object, with the same fields as in the list above. Er
 }
 ```
 
-`name`, `description` and `location` are required and must be non-empty strings. `status` is optional. It can be `stored` (the default) or `returned`. Returns `201` and the created object, or `400` on invalid input.
+`name`, `description` and `location` are required. `status` is optional. It can be `stored` (the default) or `returned`. Returns `201` and the created object.
+
+| Status | Body | Cause |
+| --- | --- | --- |
+| `400` | `{ "message": "Name, description, and location are required" }` | `name`, `description` or `location` is missing or empty |
+| `400` | `{ "message": "Status must be 'returned' or 'stored'" }` | `status` has any other value |
 
 ### `PUT /lost-objects/:id`
 
@@ -159,20 +194,44 @@ Replaces the whole object, so every field is required:
 }
 ```
 
-`name`, `description` and `location` must be non-empty strings, and `status` must be `stored` or `returned`. Any `id` in the body is ignored. Returns `200` and the updated object. Errors: `400` if `:id` is not a UUID or the body is invalid, `404` if no lost object has that id.
+`status` should be `stored` or `returned`, but this route does not check the value. Any `id` in the body is ignored. Returns `200` and the updated object.
+
+| Status | Body | Cause |
+| --- | --- | --- |
+| `400` | `{ "message": "Name, description, location, and status are required" }` | A field is missing or empty |
+| `404` | `{ "message": "Lost object not found" }` | No lost object has that id |
+| `500` | `{ "error": "<message>" }` | `:id` is not a valid UUID, so PostgreSQL rejects the query |
 
 ### `DELETE /lost-objects/:id`
 
-Returns `204` with no body. Errors: `400` if `:id` is not a UUID, `404` if no lost object has that id.
+Returns `204` with no body.
+
+| Status | Body | Cause |
+| --- | --- | --- |
+| `404` | `{ "message": "Lost object not found" }` | No lost object has that id |
+| `500` | `{ "error": "<message>" }` | `:id` is not a valid UUID, so PostgreSQL rejects the query |
 
 ### Authentication errors
 
-| Status | Cause |
-| --- | --- |
-| `401` | Missing header, malformed header (not `Bearer <token>`), or an invalid or expired token |
-| `403` | Valid token, but the role is not allowed on this route |
+Every `/lost-objects` route can also return:
 
-A malformed JSON body returns `400` with `{ "error": "<message>" }`. Unhandled errors return `500` with the same shape.
+| Status | Body | Cause |
+| --- | --- | --- |
+| `401` | `{ "message": "Authorization header missing" }` | No `Authorization` header |
+| `401` | `{ "message": "Invalid authorization header format" }` | The header is not `Bearer <token>` |
+| `401` | `{ "message": "Invalid token", "error": "<reason>" }` | The token is invalid or has expired |
+| `403` | `{ "message": "Forbidden: Insufficient role" }` | Valid token, but the role is not allowed on this route |
+
+### General errors
+
+These can happen on any route:
+
+| Status | Body | Cause |
+| --- | --- | --- |
+| `400` | `{ "error": "<message>" }` | The request body is not valid JSON |
+| `500` | `{ "error": "<message>" }` | Unexpected server error, for example the database is unreachable or a field is not a string |
+
+Errors detected by the API itself use `message`. Errors caught by the error handler use `error`.
 
 ### Example with curl
 
@@ -195,21 +254,41 @@ curl http://localhost:3000/lost-objects -H "Authorization: Bearer $TOKEN"
 The code is organised by **bounded context**. Each context is split into `domain`, `application` and `infrastructure` layers:
 
 ```text
+db-schema.sql                         # Tables to create before starting the API
 src/
-  index.ts                 # Composition root: builds repositories, services, controllers; starts the server
-  create-app.ts            # Express app: JSON parser, logging, routes, error handler
-  routes/                  # Route definitions and the auth middleware applied to each route
+  index.ts                            # Composition root: builds repositories, services, controllers; starts the server
+  create-app.ts                       # Express app: JSON parser, logging, routes, error handler
+  routes/
+    auth.routes.ts                    # /auth/signup, /auth/login
+    lost-object.routes.ts             # /lost-objects CRUD and the role guard of each route
   middlewares/
-    auth.middleware.ts     # Bearer token check + role guards (admin, visitor, visitor-or-admin)
-    log.middleware.ts      # Request logging with response time
-    error.middleware.ts    # Catches unhandled errors and returns 500
+    auth.middleware.ts                # Bearer token check + role guards (admin, visitor, visitor-or-admin)
+    log.middleware.ts                 # Request logging with response time
+    error.middleware.ts               # Unhandled errors: keeps 4xx statuses (e.g. malformed JSON), otherwise 500
   utils/
-    db.ts                  # pg-promise connection (singleton)
-    jwt.ts                 # Token creation and verification with jose
+    db.ts                             # pg-promise connection (singleton)
+    jwt.ts                            # Token creation and verification with jose
   contexts/
-    shared/                # Generic Repository<T> contract
-    users/                 # User entity, service, controller, Postgres repository
-    lost-objects/          # LostObject entity, service, controller, Postgres repository
+    shared/
+      infrastructure/
+        repository.contract.ts        # Generic Repository<T> contract
+    users/
+      domain/
+        user.entity.ts                # User and PublicUser (without password) types
+      application/
+        users.controller.ts           # Signup and login: validates input, hashes passwords, issues JWTs
+        users.service.ts
+      infrastructure/
+        users-repository.contract.ts  # UsersRepository contract
+        users.postgres.repository.ts  # SQL queries for users
+    lost-objects/
+      domain/
+        lost-object.entity.ts         # LostObject type
+      application/
+        lost-object.controller.ts     # Validates input and maps results to HTTP responses
+        lost-object.service.ts
+      infrastructure/
+        lost-object.postgres.repository.ts  # SQL queries for lost objects
 ```
 
 Requests pass through these layers: **route → middleware → controller** (validates the HTTP input) **→ service → repository** (runs SQL). Dependencies are injected through constructors in `index.ts`. To swap the storage, implement the repository contract with another class.
