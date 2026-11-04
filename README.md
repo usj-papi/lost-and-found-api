@@ -2,13 +2,13 @@
   <img src="docs/banner.svg" alt="Universidad San Jorge · Escuela de Arquitectura y Tecnología" width="100%">
 </p>
 
-<p align="center">
+# Lost and Found API
+
+<p>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D22.18-5FA04E?logo=nodedotjs&logoColor=white" alt="Node.js >= 22.18">
   <img src="https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white" alt="TypeScript 7">
   <img src="https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white" alt="Express 5">
 </p>
-
-# Lost and Found API
 
 A REST API for registering and listing objects found on campus. It is built with Node.js, TypeScript and Express, stores its data in PostgreSQL (for example Supabase), and uses JWT authentication with two roles: `visitor` and `admin`.
 
