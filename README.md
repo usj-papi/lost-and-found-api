@@ -58,7 +58,7 @@ All variables are read from `.env`:
 | `DATABASE_URI` | **Yes** | PostgreSQL connection string. The server refuses to start without it. |
 | `JWT_SECRET` | **Yes** | Secret used to sign and verify tokens (HS256). Without it, login and protected routes fail. |
 
-**Supabase:** copy the PostgreSQL URI from **Connect → Session pooler** (port 5432) and replace the password placeholder with your database password.
+**Supabase:** copy the PostgreSQL URI from **Connect → Transaction pooler** (port 6543, recommended for serverless deployments such as Vercel) and replace the password placeholder with your database password.
 
 > [!TIP]
 > If your database password contains reserved characters such as `@`, `#`, `/` or `:`, percent-encode them in the URI (for example `@` becomes `%40`). Otherwise the connection fails with an authentication or host error.

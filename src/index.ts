@@ -21,6 +21,12 @@ const usersController = new UsersController(usersService);
 
 const app = createApp(lostObjectController, usersController);
 
-app.listen(port, () =>
-  console.log(`API listening on http://localhost:${port}`),
-);
+// On Vercel the exported app is wrapped in a serverless function,
+// so only open a port when running locally.
+if (!process.env.VERCEL) {
+  app.listen(port, () =>
+    console.log(`API listening on http://localhost:${port}`),
+  );
+}
+
+export default app;
