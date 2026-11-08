@@ -16,10 +16,10 @@
     "bcrypt": "^6.0.0",
     "express": "^5.2.1",
     "jose": "^6.2.12",
-    "pg-promise": "^12.7.1",
-    "@types/node": "^26.6.4"
+    "pg-promise": "^12.7.1"
   },
   "devDependencies": {
+    "@types/node": "^26.6.4",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "tsx": "^4.23.15",
