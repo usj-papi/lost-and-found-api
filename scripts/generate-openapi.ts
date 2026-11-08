@@ -4,7 +4,8 @@
 // It runs before `dev`, `check` and `build` because the comments live in the
 // TypeScript sources: type-only files (such as the entities) compile to empty
 // JavaScript, so their comments would be lost if we parsed dist/ instead.
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import swaggerJsdoc from "swagger-jsdoc";
 
@@ -69,5 +70,6 @@ const document = swaggerJsdoc({
   },
 });
 
+mkdirSync(dirname(output), { recursive: true });
 writeFileSync(output, `${JSON.stringify(document, null, 2)}\n`);
 console.log(`OpenAPI document written to ${output}`);
