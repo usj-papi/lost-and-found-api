@@ -23,7 +23,8 @@ const usersController = new UsersController(usersService);
 // Vercel only detects an Express entrypoint that imports express directly,
 // so the root app is created here and the configured app is mounted on it.
 const app = express();
-app.use(createApp(lostObjectController, usersController));
+
+createApp(app, lostObjectController, usersController);
 
 // On Vercel the exported app is wrapped in a serverless function,
 // so only open a port when running locally.
