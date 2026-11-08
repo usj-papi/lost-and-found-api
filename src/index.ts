@@ -1,3 +1,4 @@
+import express from "express";
 import { LostObjectController } from "./contexts/lost-objects/application/lost-object.controller.js";
 import { LostObjectService } from "./contexts/lost-objects/application/lost-object.service.js";
 import { LostObjectPostgresRepository } from "./contexts/lost-objects/infrastructure/lost-object.postgres.repository.js";
@@ -19,7 +20,10 @@ const usersRepository = new UsersPostgresRepository();
 const usersService = new UsersService(usersRepository);
 const usersController = new UsersController(usersService);
 
-const app = createApp(lostObjectController, usersController);
+// Vercel only detects an Express entrypoint that imports express directly,
+// so the root app is created here and the configured app is mounted on it.
+const app = express();
+app.use(createApp(lostObjectController, usersController));
 
 // On Vercel the exported app is wrapped in a serverless function,
 // so only open a port when running locally.
