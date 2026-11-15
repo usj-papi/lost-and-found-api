@@ -6,6 +6,7 @@ import { errorMiddleware } from "./middlewares/error.middleware.js";
 import { logMiddleware } from "./middlewares/log.middleware.js";
 import { authRoutes } from "./routes/auth.routes.js";
 import { docsRoutes } from "./routes/docs.routes.js";
+import { healthRoutes } from "./routes/health.routes.js";
 import { lostObjectRoutes } from "./routes/lost-object.routes.js";
 
 export function createApp(
@@ -18,6 +19,7 @@ export function createApp(
 
   app.use(logMiddleware);
 
+  app.use("/health", healthRoutes());
   app.use("/docs", docsRoutes());
   app.use("/lost-objects", lostObjectRoutes(lostObjectController));
   app.use("/auth", authRoutes(usersController));
