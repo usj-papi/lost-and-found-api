@@ -1,6 +1,7 @@
 import { type Express, json } from "express";
 import type { LostObjectController } from "./contexts/lost-objects/application/lost-object.controller.js";
 import type { UsersController } from "./contexts/users/application/users.controller.js";
+import { corsMiddleware } from "./middlewares/cors.middleware.js";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import { logMiddleware } from "./middlewares/log.middleware.js";
 import { authRoutes } from "./routes/auth.routes.js";
@@ -12,6 +13,7 @@ export function createApp(
   lostObjectController: LostObjectController,
   usersController: UsersController,
 ) {
+  app.use(corsMiddleware);
   app.use(json());
 
   app.use(logMiddleware);
