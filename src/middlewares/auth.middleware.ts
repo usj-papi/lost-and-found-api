@@ -57,6 +57,8 @@ export function authMiddleware(
           .status(403)
           .json({ message: "Forbidden: Insufficient role" });
       }
+      // Expose the verified claims to the route handlers.
+      res.locals.jwtPayload = payload;
       next();
     })
     .catch((error) => {

@@ -8,6 +8,7 @@ import { authRoutes } from "./routes/auth.routes.js";
 import { docsRoutes } from "./routes/docs.routes.js";
 import { healthRoutes } from "./routes/health.routes.js";
 import { lostObjectRoutes } from "./routes/lost-object.routes.js";
+import { usersRoutes } from "./routes/users.routes.js";
 
 export function createApp(
   app: Express,
@@ -23,6 +24,7 @@ export function createApp(
   app.use("/docs", docsRoutes());
   app.use("/lost-objects", lostObjectRoutes(lostObjectController));
   app.use("/auth", authRoutes(usersController));
+  app.use("/users", usersRoutes(usersController));
 
   app.use(errorMiddleware);
 

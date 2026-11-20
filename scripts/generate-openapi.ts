@@ -26,8 +26,9 @@ const document = swaggerJsdoc({
         "REST API for registering and listing lost objects found on campus.",
     },
     tags: [
-      { name: "Auth", description: "Sign up and log in" },
+      { name: "Auth", description: "Sign up, log in and manage sessions" },
       { name: "Lost objects", description: "Manage lost objects" },
+      { name: "Users", description: "Manage users (admin only)" },
     ],
     components: {
       securitySchemes: {
