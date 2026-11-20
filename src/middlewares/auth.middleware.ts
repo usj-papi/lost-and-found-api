@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { errors } from "jose";
 import { verifyJWT } from "../utils/jwt.js";
 
 export function adminAuthMiddleware(
@@ -62,6 +63,13 @@ export function authMiddleware(
       next();
     })
     .catch((error) => {
+      // A stable code lets clients tell "refresh and retry" apart from
+      // "the token is bad, log in again".
+      if (error instanceof errors.JWTExpired) {
+        return res
+          .status(401)
+          .json({ message: "Token expired", code: "TOKEN_EXPIRED" });
+      }
       console.error("JWT verification failed:", error);
       return res
         .status(401)
