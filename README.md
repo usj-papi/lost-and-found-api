@@ -160,7 +160,7 @@ Returns `200` with a JWT and a refresh token:
 { "token": "<jwt>", "refreshToken": "<opaque>" }
 ```
 
-The JWT payload holds `sub` (the user id), `username` and `role`, and expires after 15 minutes. The refresh token is a random value valid for 7 days. Only its SHA-256 hash is stored in the database.
+The JWT payload holds `sub` (the user id), `username`, `name`, `email`, `role` and `createdAt` (ISO 8601), and expires after 15 minutes. It never includes the password or refresh token hashes. The refresh token is a random value valid for 7 days. Only its SHA-256 hash is stored in the database.
 
 Each user has a single active session: a new login replaces the previous refresh token, so the old one stops working.
 
@@ -358,7 +358,8 @@ Every `/lost-objects` and `/users` route can also return:
 | --- | --- | --- |
 | `401` | `{ "message": "Authorization header missing" }` | No `Authorization` header |
 | `401` | `{ "message": "Invalid authorization header format" }` | The header is not `Bearer <token>` |
-| `401` | `{ "message": "Invalid token", "error": "<reason>" }` | The token is invalid or has expired |
+| `401` | `{ "message": "Token expired", "code": "TOKEN_EXPIRED" }` | The token has expired. Call `POST /auth/refresh` and retry the request |
+| `401` | `{ "message": "Invalid token", "error": "<reason>" }` | The token is invalid (bad signature, malformed…). Log in again |
 | `403` | `{ "message": "Forbidden: Insufficient role" }` | Valid token, but the role is not allowed on this route |
 
 ### General errors
